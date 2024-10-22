@@ -1,0 +1,1 @@
+# StudentQR-Smart-Verification-Platform
