@@ -167,7 +167,7 @@ public class ClientController {
     }
 
     private String extractMatricule(String ocrResult) {
-        Pattern pattern = Pattern.compile("UN1604(\\d{4})(\\d+)");
+        Pattern pattern = Pattern.compile("UN1604\\d{4}(\\d{12})");
         Matcher matcher = pattern.matcher(ocrResult);
         if (matcher.find()) {
             System.out.println("Matched Matricule: " + matcher.group()); // Debugging line
