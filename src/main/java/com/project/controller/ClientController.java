@@ -167,15 +167,14 @@ public class ClientController {
     }
 
     private String extractMatricule(String ocrResult) {
-        Pattern pattern = Pattern.compile("UN1604\\d{4}(\\d{12})");
-        Matcher matcher = pattern.matcher(ocrResult);
-        if (matcher.find()) {
-            System.out.println("Matched Matricule: " + matcher.group()); // Debugging line
-            return matcher.group(); // Return full match
-        }
-        return null;
+    Pattern pattern = Pattern.compile("UN1604\\d{4}(\\d{12})");
+    Matcher matcher = pattern.matcher(ocrResult);
+    if (matcher.find()) {
+        System.out.println("Matched Matricule: " + matcher.group(1)); // Debugging line
+        return matcher.group(1); // Return only the 12-digit captured group
     }
-
+    return null;
+}
     private ResponseData handleProcessingError(Exception e) {
         if (e instanceof NotFoundException) {
             return new ResponseData("QR code not found in the uploaded image.", HttpStatus.NOT_FOUND.value(), null, null, null, null, null, null, null, null, null);
