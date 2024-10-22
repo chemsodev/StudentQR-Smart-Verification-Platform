@@ -26,9 +26,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 @CrossOrigin(origins = "https://verification-system-wn3u.onrender.com")
 @Controller
-@RequestMapping("/api") // Added base path for all API endpoints
+@RequestMapping("/api")
 public class ClientController {
     private static final long MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -80,8 +81,6 @@ public class ClientController {
         }
     }
 
-
-
     private String processQRCode(BufferedImage image) throws Exception {
         BufferedImageLuminanceSource source = new BufferedImageLuminanceSource(image);
         BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
@@ -90,12 +89,12 @@ public class ClientController {
         return result.getText();
     }
 
-
-
     private String extractMatriculeFromOcr(BufferedImage image, ITesseract tesseract) throws TesseractException {
         for (int i = 1; i <= 4; i++) {
             BufferedImage rotatedImage = rotateImage(image, 90 * i);
             String ocrResult = tesseract.doOCR(rotatedImage);
+            System.out.println("OCR Result after rotation " + (90 * i) + " degrees: " + ocrResult); // Debugging line
+
             String matricule = extractMatricule(ocrResult);
             if (matricule != null) {
                 return matricule;
@@ -168,10 +167,11 @@ public class ClientController {
     }
 
     private String extractMatricule(String ocrResult) {
-        Pattern pattern = Pattern.compile("UN1604(.{4})(\\d+)");
+        Pattern pattern = Pattern.compile("UN1604(\\d{4})(\\d+)");
         Matcher matcher = pattern.matcher(ocrResult);
         if (matcher.find()) {
-            return matcher.group(1);
+            System.out.println("Matched Matricule: " + matcher.group()); // Debugging line
+            return matcher.group(); // Return full match
         }
         return null;
     }
