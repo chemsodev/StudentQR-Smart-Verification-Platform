@@ -89,20 +89,34 @@ public class ClientController {
         return result.getText();
     }
 
-    private String extractMatriculeFromOcr(BufferedImage image, ITesseract tesseract) throws TesseractException {
-        for (int i = 1; i <= 4; i++) {
-            BufferedImage rotatedImage = rotateImage(image, 90 * i);
-            String ocrResult = tesseract.doOCR(rotatedImage);
-            System.out.println("OCR Result after rotation " + (90 * i) + " degrees: " + ocrResult); // Debugging line
+    
+private String extractMatriculeFromOcr(BufferedImage image, ITesseract tesseract) throws TesseractException {
+    for (int i = 1; i <= 4; i++) {
+        BufferedImage rotatedImage = rotateImage(image, 90 * i);
+        String ocrResult = tesseract.doOCR(rotatedImage);
+        System.out.println("OCR Result after rotation " + (90 * i) + " degrees: " + ocrResult); // Debugging line
 
-            String matricule = extractMatricule(ocrResult);
-            if (matricule != null) {
-                return matricule;
-            }
+        // Clean up OCR result
+        String cleanedOcrResult = ocrResult.replaceAll("\\s+", "").trim();
+        System.out.println("Cleaned OCR Result: " + cleanedOcrResult); // Debugging line
+
+        String matricule = extractMatricule(cleanedOcrResult);
+        if (matricule != null) {
+            return matricule;
         }
-        return null;
     }
+    return null;
+}
 
+private String extractMatricule(String ocrResult) {
+    Pattern pattern = Pattern.compile("UN1604\\d{4}(\\d{12})");
+    Matcher matcher = pattern.matcher(ocrResult);
+    if (matcher.find()) {
+        System.out.println("Matched Matricule: " + matcher.group(1)); // Debugging line
+        return matcher.group(1); // Return only the 12-digit captured group
+    }
+    return null;
+}
     private ResponseData verifyStudent(String matricule) {
         try {
             Student student = studentService.getStudentByMatricule(matricule);
@@ -166,15 +180,7 @@ public class ClientController {
         return rotated;
     }
 
-    private String extractMatricule(String ocrResult) {
-    Pattern pattern = Pattern.compile("UN1604\\d{4}(\\d{12})");
-    Matcher matcher = pattern.matcher(ocrResult);
-    if (matcher.find()) {
-        System.out.println("Matched Matricule: " + matcher.group(1)); // Debugging line
-        return matcher.group(1); // Return only the 12-digit captured group
-    }
-    return null;
-}
+  
     private ResponseData handleProcessingError(Exception e) {
         if (e instanceof NotFoundException) {
             return new ResponseData("QR code not found in the uploaded image.", HttpStatus.NOT_FOUND.value(), null, null, null, null, null, null, null, null, null);
